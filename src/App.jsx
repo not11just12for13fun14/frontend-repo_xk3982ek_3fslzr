@@ -73,7 +73,7 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-sky-50 to-cyan-50">
       <Hero />
 
-      <div className="max-w-5xl mx-auto px-6 -mt-10 md:-mt-12 relative z-10">
+      <div className="max-w-5xl mx-auto px-6 -mt-14 md:-mt-16 relative z-10">
         <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm p-4 md:p-6">
           <div className="flex items-center justify-between mb-3 md:mb-4">
             <h2 className="text-lg md:text-xl font-bold text-gray-900">Discover ideas</h2>
