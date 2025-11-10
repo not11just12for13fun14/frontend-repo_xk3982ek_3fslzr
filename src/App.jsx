@@ -7,7 +7,8 @@ import Filters from './components/Filters'
 import PostModal from './components/PostModal'
 
 function App() {
-  const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
+  const fallbackBackend = 'https://ta-01k9qn7r89xp0tqw7pwj35b10f-8000.wo-sd4mgb9sv14bxf5a1kr2qlfwv.w.modal.host'
+  const baseUrl = import.meta.env.VITE_BACKEND_URL || fallbackBackend
   const [items, setItems] = useState([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -24,13 +25,17 @@ function App() {
   const fetchItems = async () => {
     try {
       setLoading(true)
+      setError('')
       const res = await fetch(`${baseUrl}/api/posts?${query}`)
-      if (!res.ok) throw new Error('Failed to fetch posts')
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.detail || 'Failed to fetch posts')
+      }
       const data = await res.json()
       setItems(data.items)
       setTotal(data.total)
     } catch (e) {
-      setError(e.message)
+      setError(e.message || 'Failed to fetch posts')
     } finally {
       setLoading(false)
     }
@@ -52,7 +57,7 @@ function App() {
 
     try {
       const res = await fetch(`${baseUrl}/api/posts/${post.id}/vote`, { method: 'POST' })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.detail || 'Voting failed')
       // Align with server result
       setItems(prevItems => prevItems.map(i => i.id === post.id ? { ...i, votes_count: data.votes_count, voted: data.voted } : i))
