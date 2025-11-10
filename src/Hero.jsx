@@ -1,8 +1,9 @@
 import Logo from './components/Logo'
-import Spline from '@splinetool/react-spline'
 
 export default function Hero() {
-  const sceneUrl = 'https://prod.spline.design/AEHPcpt-Lp9Pig5y/scene.splinecode'
+  const videoSrc = import.meta.env.VITE_HERO_VIDEO_URL || 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4'
+  const posterSrc = import.meta.env.VITE_HERO_VIDEO_POSTER || ''
+
   return (
     <section className="relative h-[40vh] md:h-[46vh] overflow-hidden">
       {/* Subtle background tint blobs */}
@@ -12,9 +13,19 @@ export default function Hero() {
       {/* Half-cut orb container at the bottom */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 sm:h-52 md:h-64 overflow-hidden">
         <div className="relative left-1/2 -translate-x-1/2 top-full -translate-y-[58%] w-[720px] h-[720px]">
-          {/* Circular crop for Spline canvas */}
+          {/* Circular crop for video */}
           <div className="absolute inset-0 rounded-full overflow-hidden">
-            <Spline scene={sceneUrl} className="w-full h-full" />
+            <video
+              src={videoSrc}
+              poster={posterSrc || undefined}
+              className="w-full h-full object-cover"
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              controls={false}
+            />
           </div>
           {/* overlays for cohesive glow + rings */}
           <div className="pointer-events-none absolute inset-0 rounded-full">
@@ -24,7 +35,7 @@ export default function Hero() {
             <div className="absolute inset-10 rounded-full bg-gradient-to-br from-indigo-400/20 via-blue-300/20 to-cyan-300/20 blur-2xl" />
             {/* inner pulse */}
             <div className="absolute inset-0 animate-pulse rounded-full bg-white/5" />
-            {/* concentric rings for spline feel */}
+            {/* concentric rings */}
             <div className="absolute inset-16 rounded-full border border-white/20" />
             <div className="absolute inset-28 rounded-full border border-white/15" />
             <div className="absolute inset-40 rounded-full border border-white/10" />
