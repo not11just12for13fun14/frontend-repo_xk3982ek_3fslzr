@@ -9,7 +9,7 @@ export default function Filters({ onChange }) {
   }, [timeRange, sortBy])
 
   return (
-    <div className="flex flex-wrap items-center gap-3 bg-white/70 backdrop-blur border border-gray-200 rounded-xl p-3">
+    <div className="flex flex-wrap items-center gap-3 bg-white/70 backdrop-blur border border-gray-200 rounded-xl p-3 justify-between">
       <div className="flex items-center gap-2">
         <span className="text-sm text-gray-600">Time:</span>
         <div className="flex gap-1">
@@ -18,7 +18,7 @@ export default function Filters({ onChange }) {
           ))}
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 ml-auto">
         <span className="text-sm text-gray-600">Sort:</span>
         <div className="flex gap-1">
           {[

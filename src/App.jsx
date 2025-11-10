@@ -4,6 +4,7 @@ import Hero from './Hero'
 import PostCard from './components/PostCard'
 import NewPostForm from './components/NewPostForm'
 import Filters from './components/Filters'
+import PostModal from './components/PostModal'
 
 function App() {
   const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
@@ -12,6 +13,7 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filters, setFilters] = useState({ timeRange: 'week', sortBy: 'votes' })
+  const [active, setActive] = useState(null)
 
   const query = useMemo(() => new URLSearchParams({
     time_range: filters.timeRange,
@@ -38,11 +40,12 @@ function App() {
   const handleVote = async (post) => {
     try {
       const res = await fetch(`${baseUrl}/api/posts/${post.id}/vote`, { method: 'POST' })
+      const data = await res.json()
       if (!res.ok) {
-        const msg = await res.json().catch(() => ({}))
-        throw new Error(msg.detail || 'Voting failed')
+        throw new Error(data.detail || 'Voting failed')
       }
-      await fetchItems()
+      // Update local items
+      setItems(prev => prev.map(i => i.id === post.id ? { ...i, votes_count: data.votes_count, voted: data.voted } : i))
     } catch (e) {
       alert(e.message)
     }
@@ -56,16 +59,16 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-sky-50 to-cyan-50">
       <Hero />
 
-      <div className="max-w-5xl mx-auto px-6 -mt-16 relative z-10">
+      <div className="max-w-5xl mx-auto px-6 -mt-10 md:-mt-12 relative z-10">
         <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm p-4 md:p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900">Discover ideas</h2>
+          <div className="flex items-center justify-between mb-3 md:mb-4">
+            <h2 className="text-lg md:text-xl font-bold text-gray-900">Discover ideas</h2>
             <div className="inline-flex items-center gap-2 text-gray-600"><MessageSquarePlus className="h-5 w-5"/>Post an idea below</div>
           </div>
           <NewPostForm onCreated={handleCreated} />
-          <div className="h-6" />
-          <Filters onChange={setFilters} />
           <div className="h-4" />
+          <Filters onChange={setFilters} />
+          <div className="h-3" />
           {loading ? (
             <div className="text-center text-gray-600 py-12">Loading...</div>
           ) : error ? (
@@ -74,15 +77,19 @@ function App() {
             <div className="space-y-3">
               {items.length === 0 && (<div className="text-center text-gray-500 py-8">No ideas yet. Be the first!</div>)}
               {items.map(item => (
-                <PostCard key={item.id} post={item} onVote={handleVote} onOpen={() => {}} />
+                <PostCard key={item.id} post={item} onVote={handleVote} onOpen={setActive} />
               ))}
             </div>
           )}
         </div>
       </div>
-      <footer className="mt-16 pb-8 text-center text-sm text-gray-500">
-        Built with Vibe Coding • Product Hunt-inspired • Single-IP voting enforced
+      <footer className="mt-10 md:mt-12 pb-8 text-center text-sm text-gray-500">
+        Built with Vibe Coding • Product Hunt-inspired • One vote per IP per post
       </footer>
+
+      {active && (
+        <PostModal post={active} onClose={() => setActive(null)} onVoted={(d)=> setItems(prev => prev.map(i => i.id === d.id ? { ...i, votes_count: d.votes_count, voted: d.voted } : i))} />
+      )}
     </div>
   )
 }
