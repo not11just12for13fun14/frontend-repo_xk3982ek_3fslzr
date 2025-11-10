@@ -14,6 +14,7 @@ function App() {
   const [error, setError] = useState('')
   const [filters, setFilters] = useState({ timeRange: 'week', sortBy: 'votes' })
   const [active, setActive] = useState(null)
+  const [pendingVotes, setPendingVotes] = useState({})
 
   const query = useMemo(() => new URLSearchParams({
     time_range: filters.timeRange,
@@ -38,16 +39,29 @@ function App() {
   useEffect(() => { fetchItems() }, [query])
 
   const handleVote = async (post) => {
+    // Optimistic toggle for instant feedback
+    setPendingVotes(p => ({ ...p, [post.id]: true }))
+    const prev = items
+    const optimistic = items.map(i => {
+      if (i.id !== post.id) return i
+      const voted = !i.voted
+      const votes_count = i.votes_count + (voted ? 1 : -1)
+      return { ...i, voted, votes_count }
+    })
+    setItems(optimistic)
+
     try {
       const res = await fetch(`${baseUrl}/api/posts/${post.id}/vote`, { method: 'POST' })
       const data = await res.json()
-      if (!res.ok) {
-        throw new Error(data.detail || 'Voting failed')
-      }
-      // Update local items
-      setItems(prev => prev.map(i => i.id === post.id ? { ...i, votes_count: data.votes_count, voted: data.voted } : i))
+      if (!res.ok) throw new Error(data.detail || 'Voting failed')
+      // Align with server result
+      setItems(prevItems => prevItems.map(i => i.id === post.id ? { ...i, votes_count: data.votes_count, voted: data.voted } : i))
     } catch (e) {
+      // Revert on failure
+      setItems(prev)
       alert(e.message)
+    } finally {
+      setPendingVotes(p => ({ ...p, [post.id]: false }))
     }
   }
 
@@ -77,14 +91,14 @@ function App() {
             <div className="space-y-3">
               {items.length === 0 && (<div className="text-center text-gray-500 py-8">No ideas yet. Be the first!</div>)}
               {items.map(item => (
-                <PostCard key={item.id} post={item} onVote={handleVote} onOpen={setActive} />
+                <PostCard key={item.id} post={item} pending={!!pendingVotes[item.id]} onVote={handleVote} onOpen={setActive} />
               ))}
             </div>
           )}
         </div>
       </div>
       <footer className="mt-10 md:mt-12 pb-8 text-center text-sm text-gray-500">
-        Built with Vibe Coding • Product Hunt-inspired • One vote per IP per post
+        Built with <a className="underline hover:text-gray-700" href="https://flames.blue/" target="_blank" rel="noreferrer">Flames.Blue</a>
       </footer>
 
       {active && (

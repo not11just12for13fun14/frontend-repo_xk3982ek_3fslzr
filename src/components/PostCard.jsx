@@ -1,13 +1,15 @@
-import { MessageSquare, ArrowBigUp } from 'lucide-react'
+import { MessageSquare, ArrowBigUp, Loader2 } from 'lucide-react'
 
-export default function PostCard({ post, onVote, onOpen }) {
+export default function PostCard({ post, onVote, onOpen, pending }) {
   return (
     <div className="group bg-white/70 backdrop-blur border border-gray-200 rounded-xl p-4 flex gap-4 hover:shadow-md transition-all">
       <button
-        onClick={() => onVote(post)}
-        className={`flex flex-col items-center justify-center w-16 rounded-lg border transition-colors ${post.voted ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 hover:bg-blue-50/80 hover:border-blue-200'}`}
+        onClick={() => !pending && onVote(post)}
+        disabled={pending}
+        className={`relative flex flex-col items-center justify-center w-16 rounded-lg border transition-colors ${post.voted ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 hover:bg-blue-50/80 hover:border-blue-200'} ${pending ? 'opacity-70 cursor-not-allowed' : ''}`}
         title={post.voted ? 'Unvote' : 'Upvote'}
       >
+        {pending && <Loader2 className="absolute -top-2 -right-2 h-4 w-4 animate-spin text-blue-600" />}
         <ArrowBigUp className={`h-6 w-6 ${post.voted ? 'text-white' : 'text-blue-600'}`} />
         <span className={`text-sm font-semibold ${post.voted ? 'text-white' : 'text-blue-700'}`}>{post.votes_count}</span>
       </button>

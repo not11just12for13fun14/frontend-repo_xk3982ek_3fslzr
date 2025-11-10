@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { X, ArrowBigUp, MessageSquare } from 'lucide-react'
+import { X, ArrowBigUp, MessageSquare, Loader2 } from 'lucide-react'
 
 export default function PostModal({ post, onClose, onVoted }) {
   const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
@@ -9,6 +9,8 @@ export default function PostModal({ post, onClose, onVoted }) {
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
+  const [pendingVote, setPendingVote] = useState(false)
+  const [posting, setPosting] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -29,24 +31,54 @@ export default function PostModal({ post, onClose, onVoted }) {
   }, [post.id])
 
   const vote = async () => {
-    const r = await fetch(`${baseUrl}/api/posts/${post.id}/vote`, { method: 'POST' })
-    const d = await r.json()
-    setDetails(p => ({ ...p, votes_count: d.votes_count, voted: d.voted }))
-    onVoted?.(d)
+    if (pendingVote) return
+    setPendingVote(true)
+    // optimistic update for instant feedback
+    setDetails(p => {
+      const voted = !p.voted
+      const votes_count = (p.votes_count || 0) + (voted ? 1 : -1)
+      return { ...p, voted, votes_count }
+    })
+    try {
+      const r = await fetch(`${baseUrl}/api/posts/${post.id}/vote`, { method: 'POST' })
+      const d = await r.json()
+      if (!r.ok) throw new Error(d.detail || 'Voting failed')
+      setDetails(p => ({ ...p, votes_count: d.votes_count, voted: d.voted }))
+      onVoted?.(d)
+    } catch (e) {
+      // revert if error by refetching
+      const r1 = await fetch(`${baseUrl}/api/posts/${post.id}`)
+      const d1 = await r1.json()
+      setDetails(d1)
+      alert(e.message)
+    } finally {
+      setPendingVote(false)
+    }
   }
 
   const addComment = async (e) => {
     e.preventDefault()
-    if (!content.trim()) return
-    const r = await fetch(`${baseUrl}/api/posts/${post.id}/comments`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ author: author || null, content })
-    })
-    if (r.ok) {
+    if (!content.trim() || posting) return
+    setPosting(true)
+    try {
+      const r = await fetch(`${baseUrl}/api/posts/${post.id}/comments`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ author: author || null, content })
+      })
+      if (!r.ok) {
+        const d = await r.json().catch(()=>({}))
+        throw new Error(d.detail || 'Failed to post comment')
+      }
       setAuthor(''); setContent('')
-      const r2 = await fetch(`${baseUrl}/api/posts/${post.id}/comments`)
+      const [r2] = await Promise.all([
+        fetch(`${baseUrl}/api/posts/${post.id}/comments`)
+      ])
       const d2 = await r2.json()
       setComments(d2)
       setDetails(p => ({ ...p, comments_count: (p.comments_count || 0) + 1 }))
+    } catch (e) {
+      alert(e.message)
+    } finally {
+      setPosting(false)
     }
   }
 
@@ -63,7 +95,8 @@ export default function PostModal({ post, onClose, onVoted }) {
         ) : (
           <div className="space-y-4">
             <div className="flex items-start gap-3">
-              <button onClick={vote} className={`flex flex-col items-center justify-center w-14 rounded-lg border ${details?.voted ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 hover:bg-blue-50/80 hover:border-blue-200'} transition-colors`}>
+              <button onClick={vote} disabled={pendingVote} className={`relative flex flex-col items-center justify-center w-14 rounded-lg border ${details?.voted ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 hover:bg-blue-50/80 hover:border-blue-200'} transition-colors ${pendingVote ? 'opacity-70 cursor-not-allowed' : ''}`}>
+                {pendingVote && <Loader2 className="absolute -top-2 -right-2 h-4 w-4 animate-spin text-blue-600" />}
                 <ArrowBigUp className={`h-6 w-6 ${details?.voted ? 'text-white' : 'text-blue-600'}`} />
                 <span className={`text-sm font-semibold ${details?.voted ? 'text-white' : 'text-blue-700'}`}>{details?.votes_count ?? 0}</span>
               </button>
@@ -86,7 +119,9 @@ export default function PostModal({ post, onClose, onVoted }) {
                 <div className="flex gap-2">
                   <input value={author} onChange={e=>setAuthor(e.target.value)} placeholder="Name (optional)" className="w-40 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
                   <input value={content} onChange={e=>setContent(e.target.value)} placeholder="Write a comment" className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Post</button>
+                  <button disabled={posting} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2">
+                    {posting && <Loader2 className="h-4 w-4 animate-spin" />} Post
+                  </button>
                 </div>
               </form>
               <div className="mt-4 space-y-3 max-h-64 overflow-auto pr-1">
