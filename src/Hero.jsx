@@ -1,4 +1,5 @@
 import Logo from './components/Logo'
+import Spline from '@splinetool/react-spline'
 
 export default function Hero() {
   return (
@@ -7,12 +8,19 @@ export default function Hero() {
       <div className="absolute -top-24 -left-24 h-72 w-72 bg-gradient-to-br from-indigo-400/20 to-cyan-400/20 rounded-full blur-3xl" />
       <div className="absolute -bottom-24 -right-24 h-80 w-80 bg-gradient-to-tr from-pink-400/20 to-purple-400/20 rounded-full blur-3xl" />
 
-      {/* Calm voice-assistant orb (half-cut cover) */}
+      {/* Calm voice-assistant orb (half-cut cover) with Spline */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 sm:h-52 md:h-64 overflow-hidden">
+        {/* Centered 720x720 circle anchored so only the top half peeks up */}
         <div className="relative left-1/2 -translate-x-1/2 top-full -translate-y-[58%] w-[720px] h-[720px]">
-          {/* core glow */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-200 via-sky-200 to-cyan-200 opacity-70 blur-3xl" />
-          {/* soft tint */}
+          {/* Spline scene (decorative) */}
+          <div className="absolute inset-0">
+            <Spline
+              className="w-[720px] h-[720px]"
+              scene="https://prod.spline.design/AEHPcpt-Lp9Pig5y/scene.splinecode"
+            />
+          </div>
+          {/* Glow and rings overlays to blend with brand vibe */}
+          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-200 via-sky-200 to-cyan-200 opacity-60 blur-3xl" />
           <div className="absolute inset-10 rounded-full bg-gradient-to-br from-indigo-400/30 via-blue-300/30 to-cyan-300/30 blur-2xl" />
           {/* inner pulse */}
           <div className="absolute inset-0 animate-pulse rounded-full bg-white/10" />
