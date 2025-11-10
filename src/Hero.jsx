@@ -1,8 +1,8 @@
 import Logo from './components/Logo'
 
 export default function Hero() {
-  const videoSrc = import.meta.env.VITE_HERO_VIDEO_URL || 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4'
-  const posterSrc = import.meta.env.VITE_HERO_VIDEO_POSTER || ''
+  const ytId = (import.meta.env.VITE_HERO_YT_ID || 'njupv1XPgUQ').trim()
+  const ytSrc = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3&fs=0&disablekb=1&enablejsapi=0`
 
   return (
     <section className="relative h-[40vh] md:h-[46vh] overflow-hidden">
@@ -13,19 +13,19 @@ export default function Hero() {
       {/* Half-cut orb container at the bottom */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 sm:h-52 md:h-64 overflow-hidden">
         <div className="relative left-1/2 -translate-x-1/2 top-full -translate-y-[58%] w-[720px] h-[720px]">
-          {/* Circular crop for video */}
+          {/* Circular crop for YouTube iframe */}
           <div className="absolute inset-0 rounded-full overflow-hidden">
-            <video
-              src={videoSrc}
-              poster={posterSrc || undefined}
-              className="w-full h-full object-cover"
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="auto"
-              controls={false}
-            />
+            <div className="absolute inset-0">
+              <iframe
+                title="Hero background video"
+                src={ytSrc}
+                className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-[178%]" /* 178% ~= 16/9 cover inside square */
+                frameBorder="0"
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowFullScreen={false}
+                tabIndex={-1}
+              />
+            </div>
           </div>
           {/* overlays for cohesive glow + rings */}
           <div className="pointer-events-none absolute inset-0 rounded-full">
