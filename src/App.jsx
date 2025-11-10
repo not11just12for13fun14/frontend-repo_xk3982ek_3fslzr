@@ -98,7 +98,7 @@ function App() {
         </div>
       </div>
       <footer className="mt-10 md:mt-12 pb-8 text-center text-sm text-gray-500">
-        Built with <a className="underline hover:text-gray-700" href="https://flames.blue/" target="_blank" rel="noreferrer">Flames.Blue</a>
+        Built with <span className="mx-1" role="img" aria-label="love">❤️</span> at <a className="underline hover:text-gray-700" href="https://flames.blue/" target="_blank" rel="noreferrer">Flames.Blue</a>
       </footer>
 
       {active && (
