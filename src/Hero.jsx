@@ -4,10 +4,13 @@ import Logo from './components/Logo'
 export default function Hero() {
   return (
     <section className="relative h-[40vh] md:h-[46vh] overflow-hidden">
-      {/* Spline background (replaces orb, rings, and YouTube embed) */}
+      {/* Background stays as-is (lets the original page gradient show through) */}
+
+      {/* Spline layer: translucent and shifted down slightly */}
       <div className="absolute inset-0">
         <Spline
           scene="https://prod.spline.design/AEHPcpt-Lp9Pig5y/scene.splinecode"
+          className="h-full w-full opacity-60 transform translate-y-8 pointer-events-none"
         />
       </div>
 
