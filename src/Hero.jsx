@@ -1,25 +1,34 @@
 import Logo from './components/Logo'
+import Spline from '@splinetool/react-spline'
 
 export default function Hero() {
+  const sceneUrl = 'https://prod.spline.design/AEHPcpt-Lp9Pig5y/scene.splinecode'
   return (
     <section className="relative h-[40vh] md:h-[46vh] overflow-hidden">
       {/* Subtle background tint blobs */}
       <div className="absolute -top-24 -left-24 h-72 w-72 bg-gradient-to-br from-indigo-400/20 to-cyan-400/20 rounded-full blur-3xl" />
       <div className="absolute -bottom-24 -right-24 h-80 w-80 bg-gradient-to-tr from-pink-400/20 to-purple-400/20 rounded-full blur-3xl" />
 
-      {/* Calm voice-assistant orb (half-cut cover) */}
+      {/* Half-cut orb container at the bottom */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 sm:h-52 md:h-64 overflow-hidden">
         <div className="relative left-1/2 -translate-x-1/2 top-full -translate-y-[58%] w-[720px] h-[720px]">
-          {/* core glow */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-200 via-sky-200 to-cyan-200 opacity-70 blur-3xl" />
-          {/* soft tint */}
-          <div className="absolute inset-10 rounded-full bg-gradient-to-br from-indigo-400/30 via-blue-300/30 to-cyan-300/30 blur-2xl" />
-          {/* inner pulse */}
-          <div className="absolute inset-0 animate-pulse rounded-full bg-white/10" />
-          {/* concentric rings for spline feel */}
-          <div className="absolute inset-16 rounded-full border border-white/20" />
-          <div className="absolute inset-28 rounded-full border border-white/15" />
-          <div className="absolute inset-40 rounded-full border border-white/10" />
+          {/* Circular crop for Spline canvas */}
+          <div className="absolute inset-0 rounded-full overflow-hidden">
+            <Spline scene={sceneUrl} className="w-full h-full" />
+          </div>
+          {/* overlays for cohesive glow + rings */}
+          <div className="pointer-events-none absolute inset-0 rounded-full">
+            {/* core glow */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-200 via-sky-200 to-cyan-200 opacity-40 blur-3xl" />
+            {/* soft tint */}
+            <div className="absolute inset-10 rounded-full bg-gradient-to-br from-indigo-400/20 via-blue-300/20 to-cyan-300/20 blur-2xl" />
+            {/* inner pulse */}
+            <div className="absolute inset-0 animate-pulse rounded-full bg-white/5" />
+            {/* concentric rings for spline feel */}
+            <div className="absolute inset-16 rounded-full border border-white/20" />
+            <div className="absolute inset-28 rounded-full border border-white/15" />
+            <div className="absolute inset-40 rounded-full border border-white/10" />
+          </div>
         </div>
       </div>
 
